@@ -4,7 +4,6 @@
 
 #include "Cassy.h"
 #include <iostream>
-#include <string>
 
 #define ADC_CALIB_ACCURACY 2000
 #define TIMEOUT 100
