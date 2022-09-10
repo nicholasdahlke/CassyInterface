@@ -5,7 +5,7 @@
 #ifndef CASSYINTERFACE_CASSY_H
 #define CASSYINTERFACE_CASSY_H
 #include <cstdint>
-#include <hidapi/hidapi.h>
+#include "hidapi.h"
 #include <vector>
 
 class Cassy {
