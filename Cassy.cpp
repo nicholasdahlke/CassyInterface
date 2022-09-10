@@ -84,7 +84,7 @@ int Cassy::send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t *
     message[0] = 0;
     message[1] = 3;
     message[2] = cassy_id_prefix;
-    message[3] = cassy_id;
+    message[3] = cassy_id_param;
     message[4] = command;
 
     hid_res = hid_write(cassy_handle, message, CASSY_MESSAGE_LENGTH);
@@ -104,7 +104,7 @@ int Cassy::send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t *
     uint8_t message[CASSY_MESSAGE_LENGTH];
     message[0] = 0;
     message[2] = cassy_id_prefix;
-    message[3] = cassy_id;
+    message[3] = cassy_id_param;
     message[4] = command;
     for (int i = 0; i < parameter_length; ++i) {
         message[5+i] = parameters[i];
