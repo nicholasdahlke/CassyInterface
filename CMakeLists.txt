@@ -5,6 +5,5 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(hidapi)
 find_package(wxWidgets CONFIG REQUIRED)
 
-add_executable(CassyInterface main.cpp Cassy.cpp Cassy.h)
 
 target_link_libraries(CassyInterface PRIVATE hidapi::hidapi wx::core wx::base)
