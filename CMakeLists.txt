@@ -4,6 +4,7 @@ project(CassyInterface)
 set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(hidapi)
 find_package(wxWidgets REQUIRED COMPONENTS net core base)
+include(${wxWidgets_USE_FILE})
 add_executable(CassyInterface main.cpp Cassy.h Cassy.cpp)
 
 target_link_libraries(CassyInterface PRIVATE hidapi::hidapi ${wxWidgets_LIBRARIES})
