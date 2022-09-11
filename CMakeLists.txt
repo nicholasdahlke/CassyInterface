@@ -4,6 +4,5 @@ project(CassyInterface)
 set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(hidapi)
 
-add_executable(CassyInterface main.cpp Cassy.cpp Cassy.h)
 
 target_link_libraries(CassyInterface PRIVATE hidapi::hidapi)
