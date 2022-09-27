@@ -11,7 +11,8 @@
 bool Cassy::connect()
 {
     hid_res = hid_init();
-    cassy_handle = hid_open(vendor, product, NULL);
+        cassy_handle = hid_open(vendor, product, NULL);
+
     if (cassy_handle == NULL)
     {
         std::cerr << "Error while connecting to cassy\n";
@@ -87,6 +88,7 @@ int Cassy::send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t *
     message[4] = command;
 
     hid_res = hid_write(cassy_handle, message, CASSY_MESSAGE_LENGTH);
+    print_hex(message, sizeof(message)/ sizeof(uint8_t));
     if (hid_res == -1)
     {
         std::cerr << "Error writing command to device\n";
@@ -109,9 +111,10 @@ int Cassy::send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t *
         message[5+i] = parameters[i];
         message_length++;
     }
-    message[0] = message_length;
+    message[1] = message_length;
 
     hid_res = hid_write(cassy_handle, message, CASSY_MESSAGE_LENGTH);
+    print_hex(message, sizeof(message)/ sizeof(uint8_t));
     if (hid_res == -1)
     {
         std::cerr << "Error writing command to device\n";
@@ -128,7 +131,7 @@ void Cassy::get_cassys() {
     {
         uint8_t res_buf[CASSY_MESSAGE_LENGTH];
         int res = send_command(multiple_cassy_ids[i], get_hardware_version, res_buf);
-        if (res != -1)
+        if (res == 64)
             cassys.push_back(multiple_cassy_ids[i]);
     }
 }
@@ -179,7 +182,7 @@ int Cassy::set_relay(Cassy::relay relay_channel, bool value)
         parameters[0] = 0;
     uint8_t res_buf[CASSY_MESSAGE_LENGTH];
     hid_res = send_command(relay_channel.cassy_id, set_relay_value, res_buf, parameters, 1);
-    if (res_buf[0] != parameters[0] || hid_res != 1)
+    if (res_buf[1] != parameters[0])
     {
         std::cerr << "Error setting relay\n";
         return -1;
@@ -245,14 +248,20 @@ float Cassy::read_voltage(Cassy::voltage_channel channel, Cassy::CassyVoltageRan
         case 1:
             return convert_adc_raw(voltage_buf, range);
         case 2:
-            std::cerr << "Overflow on cassy" << std::hex << static_cast<int>(channel.cassy_id) << "\n";
+            std::cerr << "Overflow on cassy " << std::hex << static_cast<int>(channel.cassy_id) << "\n";
             break;
         case 3:
-            std::cerr << "Underflow on cassy" << std::hex << static_cast<int>(channel.cassy_id) << "\n";
+            std::cerr << "Underflow on cassy " << std::hex << static_cast<int>(channel.cassy_id) << "\n";
             break;
 
     }
     return 0;
 }
 
-
+void Cassy::print_hex(uint8_t *buf, int len)
+{
+    for (int i = 0; i < len; ++i) {
+        std::cout << std::hex << static_cast<int>(buf[i]);
+    }
+    std::cout << "\n";
+}

@@ -57,21 +57,18 @@ public:
 
 
 private:
-    enum HidIDs
-    {
-        vendor = 0xf11,
-        product = 0x1000
-    };
+
+    uint16_t vendor = 0xf11;
+    uint16_t product = 0x1001;
+
 
     uint8_t cassy_id_prefix = 0x1b; //prefix in front of the actual cassy id
     uint8_t multiple_cassy_ids[8] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80}; //id of the cassy from left to right
 
     enum CassyCommands
     {
-        reset = 0,                  //performs a software reset of the cassy
         get_hardware_version = 1,   //returns the type of cassy connected
         get_firmware_version = 2,   //returns the firmware version
-        set_mode = 7,               //sets the led mode?
         get_sensor_box_a = 126,     //get the type of sensor box connected to input a
         get_sensor_box_b = 127,     //get the type fo sensor box connected to input b
         set_relay_value = 43,       //sets the relay to a value
@@ -81,7 +78,7 @@ private:
 
 
 
-    hid_device *cassy_handle;
+    hid_device *cassy_handle = NULL;
     int hid_res;
 
     void get_cassys(); //returns an array of all available cassy ids
@@ -91,6 +88,8 @@ private:
     int send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t* res_buf, uint8_t* parameters, int parameter_length);
     int send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t* res_buf);
     float convert_adc_raw(uint8_t * voltage_adc_buf, CassyVoltageRanges range);
+
+    void print_hex(uint8_t *buf, int len);
 };
 
 
