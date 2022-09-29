@@ -55,6 +55,7 @@ public:
     void print_voltage_channels();
     void print_relays();
 
+    ~Cassy() {disconnect();}
 
 private:
 
