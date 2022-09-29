@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <windows.h>
+#include <cstdint>
 
 class SerialPort {
 public:
@@ -36,15 +37,16 @@ public:
 
     void disconnect();
 
-
+    bool connected = false;
 private:
     HANDLE serial_handle;
-    DCB serial_parameters;
-    COMMTIMEOUTS serial_timeouts;
+    DCB serial_parameters = {0};
+    COMMTIMEOUTS serial_timeouts = {0};
 
-    std::string port;
+    std::string serial_port_name;
     BaudRate baud;
 
+    int configure_port();
 
 };
 
