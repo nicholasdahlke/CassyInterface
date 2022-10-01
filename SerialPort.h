@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <termios.h>
 #include <unistd.h>
+#include <filesystem>
 #endif
 
 class SerialPort {
@@ -37,14 +38,18 @@ public:
         SER_BAUD_256000 = 256000
     };
 
-    SerialPort(std::string Port, BaudRate rate);
+    SerialPort();
     ~SerialPort();
 
     int write_bytes(std::vector<uint8_t> data);
     std::vector<uint8_t> read_bytes(int length);
+    int connect();
     void disconnect();
 
+    std::vector<std::string> serial_ports;
     bool connected = false;
+    std::string serial_port_name;
+    BaudRate baud;
 private:
 #ifdef _WIN32
     HANDLE serial_handle;
@@ -55,10 +60,9 @@ private:
     struct termios tty;
     int serial_handle;
 #endif
-    std::string serial_port_name;
-    BaudRate baud;
 
-    int configure_port();
+    std::vector<std::string> get_serial_ports();
+
 
 };
 

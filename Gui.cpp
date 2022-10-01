@@ -3,6 +3,7 @@
 //
 
 #include "Gui.h"
+
 #include <iostream>
 
 void Gui::glfw_error_callback(int error, const char *description)
@@ -43,6 +44,44 @@ int Gui::main_loop()
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
             ImGui::End();
+
+
+            ImGui::Begin("PID and Movement Control");
+            ImGui::Text("Connect and control the motor in this window");
+            if(ImGui::BeginCombo("Serial Port", serial_handle->serial_ports[selected_port_index].c_str()))
+            {
+                for (int i = 0; i < serial_handle->serial_ports.size(); ++i) {
+                    bool isSelected = (selected_port_index == i);
+                    if(ImGui::Selectable(serial_handle->serial_ports[i].c_str(), isSelected))
+                        selected_port_index = i;
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            if(serial_handle->connected == false)
+            {
+                if (ImGui::Button("Connect"))
+                {
+                    serial_handle->serial_port_name = serial_handle->serial_ports[selected_port_index];
+                    serial_handle->baud = SerialPort::SER_BAUD_9600;
+                    serial_handle->connect();
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Disconnect"))
+                    serial_handle->disconnect();
+            }
+            ImGui::SameLine();
+            if(serial_handle->connected == false)
+                ImGui::TextColored(ImVec4(1,0,0,1), "Disconnected");
+            else
+                ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
+
+
+
+            ImGui::End();
         }
         ImGui::Render();
         int display_w, display_h;
@@ -60,6 +99,7 @@ int Gui::main_loop()
 
     glfwDestroyWindow(window);
     glfwTerminate();
+    return 0;
 }
 
 Gui::Gui()
@@ -93,4 +133,5 @@ Gui::Gui()
     ImGui_ImplOpenGL3_Init(glsl_version);
     clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     cassy_handle = new Cassy();
+    serial_handle = new SerialPort();
 }

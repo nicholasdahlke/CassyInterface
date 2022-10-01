@@ -5,7 +5,7 @@
 #include "SerialPort.h"
 #include <iostream>
 
-int SerialPort::configure_port()
+int SerialPort::connect()
 {
 #ifdef _WIN32
     const char *serial_port_name_cstr = serial_port_name.c_str();
@@ -157,17 +157,9 @@ int SerialPort::configure_port()
     return 0;
 }
 
-SerialPort::SerialPort(std::string Port, SerialPort::BaudRate rate)
+SerialPort::SerialPort()
 {
-    if (!Port.empty())
-        serial_port_name = Port;
-    else
-    {
-        std::cerr << "Port name must not be empty \n";
-    }
-    baud = rate;
-
-    configure_port();
+    serial_ports = get_serial_ports();
 }
 
 int SerialPort::write_bytes(std::vector<uint8_t> data)
@@ -244,6 +236,20 @@ std::vector<uint8_t> SerialPort::read_bytes(int length)
         return_vector.push_back(read_buf[i]);
     }
 
+    return return_vector;
+}
+
+std::vector<std::string> SerialPort::get_serial_ports()
+{
+#ifdef linux
+    std::vector<std::string> return_vector;
+    std::string tty_path = "/sys/class/tty";
+    for (const auto & entry : std::filesystem::directory_iterator(tty_path))
+    {
+        if(std::filesystem::exists(entry.path().string() + "/device"))
+            return_vector.push_back("/dev/" + entry.path().filename().string());
+    }
+#endif
     return return_vector;
 }
 
