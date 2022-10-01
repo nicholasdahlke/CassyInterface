@@ -42,7 +42,6 @@ public:
 
     int write_bytes(std::vector<uint8_t> data);
     std::vector<uint8_t> read_bytes(int length);
-
     void disconnect();
 
     bool connected = false;
