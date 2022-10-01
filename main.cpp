@@ -22,10 +22,10 @@ int main()
      */
 
     SerialPort* serialPort;
-    serialPort = new SerialPort("COM3", SerialPort::SER_BAUD_9600);
+    serialPort = new SerialPort("/dev/ttyACM0", SerialPort::SER_BAUD_9600);
     std::vector<uint8_t> vect(10, 12);
     serialPort->write_bytes(vect);
-    std::vector<uint8_t> answer;
-    answer = serialPort->read_bytes(vect.size());
+    //std::vector<uint8_t> answer;
+    //answer = serialPort->read_bytes(vect.size());
 
 }

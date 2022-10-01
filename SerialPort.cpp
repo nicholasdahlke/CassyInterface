@@ -7,6 +7,7 @@
 
 int SerialPort::configure_port()
 {
+#ifdef _WIN32
     const char *serial_port_name_cstr = serial_port_name.c_str();
     serial_handle = CreateFile(serial_port_name_cstr, GENERIC_READ | GENERIC_WRITE,
                                0,
@@ -61,7 +62,98 @@ int SerialPort::configure_port()
         std::cerr << "Error setting com mask\n";
         return -5;
     }
+#endif
+#ifdef linux
+    const char *serial_port_name_cstr = serial_port_name.c_str();
+    serial_handle = open(serial_port_name_cstr, O_RDWR);
 
+    if (serial_handle < 0)
+    {
+        std::cerr << "Error opening serial port\n";
+        return -1;
+    }
+
+    if(tcgetattr(serial_handle, &tty) != 0)
+    {
+        std::cerr << "Error getting Serial Attributes\n";
+        return -2;
+    }
+
+    tty.c_cflag &= ~PARENB;  //No parity bit
+    tty.c_cflag &= ~CSTOPB;  //Use one stop bit
+    tty.c_cflag &= ~CSIZE;   //Clear size bit
+    tty.c_cflag |= CS8;      //Set size to 8 bit
+    tty.c_cflag &= ~CRTSCTS; //Disable hardware flow control
+    tty.c_cflag |= CREAD | CLOCAL;  //Allow reading and disable control lines
+
+    tty.c_lflag &= ~ICANON;  //Disable canoncial mode
+    tty.c_lflag &= ~ECHO;    //Disable ECHO
+    tty.c_lflag &= ~ECHOE;   //
+    tty.c_lflag &= ~ECHONL;  //
+    tty.c_lflag &= ~ISIG;   //Disable signal characters
+
+    tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);  //Disable special handling of recieved data
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY);                           //Disable software flow control
+    
+    tty.c_oflag &= ~OPOST; //Disable special handling of output data
+    tty.c_oflag &= ~ONLCR; //Prevent newline conversion
+    
+    tty.c_cc[VTIME] = 10;  //Set timeout for reading to 1 s (10 deciseconds)
+    tty.c_cc[VMIN]  = 0;   //Wait for any byte to be recieved
+
+    speed_t baud_rate;
+
+    switch (baud) {
+        case SER_BAUD_110:
+            baud_rate = B110;
+            break;
+        case SER_BAUD_300:
+            baud_rate = B300;
+            break;
+        case SER_BAUD_600:
+            baud_rate = B600;
+            break;
+        case SER_BAUD_1200:
+            baud_rate = B1200;
+            break;
+        case SER_BAUD_2400:
+            baud_rate = B2400;
+            break;
+        case SER_BAUD_4800:
+            baud_rate = B4800;
+            break;
+        case SER_BAUD_9600:
+            baud_rate = B9600;
+            break;
+        case SER_BAUD_19200:
+            baud_rate = B19200;
+            break;
+        case SER_BAUD_38400:
+            baud_rate = B38400;
+            break;
+        case SER_BAUD_57600:
+            baud_rate = B57600;
+            break;
+        case SER_BAUD_115200:
+            baud_rate = B115200;
+            break;
+        default:
+            std::cerr << "Baudrate not recognized\n";
+            return -3;
+    }
+
+    cfsetispeed(&tty, baud_rate);
+    cfsetospeed(&tty, baud_rate);
+
+    if(tcsetattr(serial_handle, TCSANOW, &tty) != 0)
+    {
+        std::cerr << "Error updating serial configuration";
+        return -4
+        ;
+    }
+
+    connected = true;
+#endif
     return 0;
 }
 
@@ -86,7 +178,7 @@ int SerialPort::write_bytes(std::vector<uint8_t> data)
     {
         send_buf[i] = data[i];
     }
-
+#ifdef _WIN32
     DWORD dwWrite = 0;
 
     if(!WriteFile(serial_handle, send_buf, data.size(), &dwWrite, NULL))
@@ -100,7 +192,22 @@ int SerialPort::write_bytes(std::vector<uint8_t> data)
         std::cerr << "None or not all bytes written\n";
         return -2;
     }
+#endif
+#ifdef linux
+    int dwWrite = 0;
+    dwWrite = write(serial_handle, send_buf, sizeof(send_buf));
 
+    if(dwWrite <= 0)
+    {
+        std::cerr << "Error writing to serial port\n";
+        return -1;
+    }
+    if (dwWrite != sizeof(send_buf))
+    {
+        std::cerr << "None or not all bytes written";
+        return -1;
+    }
+#endif
     return dwWrite;
 }
 
@@ -108,9 +215,10 @@ std::vector<uint8_t> SerialPort::read_bytes(int length)
 {
 
     uint8_t read_buf[length + 1];
-    DWORD dwRead = 0;
     std::vector<uint8_t> return_vector;
 
+#ifdef _WIN32
+    DWORD dwRead = 0;
     while(dwRead == 0)
     {
         if(!ReadFile(serial_handle, read_buf, length, &dwRead, NULL))
@@ -119,7 +227,7 @@ std::vector<uint8_t> SerialPort::read_bytes(int length)
             return return_vector;
         }
     }
-
+#endif
     for(int i = 0; i < length; i++)
     {
         return_vector.push_back(read_buf[i]);
@@ -132,7 +240,12 @@ void SerialPort::disconnect()
 {
     if(!connected)
         std::cerr << "Not connected\n";
+#ifdef _WIN32
     CloseHandle(serial_handle);
+#endif
+#ifdef linux
+    close(serial_handle);
+#endif
 }
 
 SerialPort::~SerialPort()

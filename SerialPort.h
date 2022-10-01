@@ -6,8 +6,16 @@
 #define CASSYINTERFACE_SERIALPORT_H
 #include <string>
 #include <vector>
-#include <windows.h>
 #include <cstdint>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#ifdef linux
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 class SerialPort {
 public:
@@ -39,10 +47,15 @@ public:
 
     bool connected = false;
 private:
+#ifdef _WIN32
     HANDLE serial_handle;
     DCB serial_parameters = {0};
     COMMTIMEOUTS serial_timeouts = {0};
-
+#endif
+#ifdef linux
+    struct termios tty;
+    int serial_handle;
+#endif
     std::string serial_port_name;
     BaudRate baud;
 
