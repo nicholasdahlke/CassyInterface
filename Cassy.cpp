@@ -21,6 +21,7 @@ bool Cassy::connect()
     get_cassys();
     get_voltage_channels();
     get_relays();
+    connected = true;
     return true;
 }
 
@@ -28,6 +29,7 @@ void Cassy::disconnect()
 {
     hid_close(cassy_handle);
     hid_res = hid_exit();
+    connected = false;
 }
 
 #ifdef linux

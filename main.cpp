@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include "Gui.h"
 
 #ifdef _WIN32
 #define PAUSE system("pause")
@@ -23,13 +24,8 @@ int main()
     cassy->set_relay(cassy->relays[1], false);
     cassy->disconnect();
      */
+    Gui* gui;
+    gui = new Gui();
+    gui->main_loop();
 
-    SerialPort* serialPort;
-    serialPort = new SerialPort("/dev/ttyACM0", SerialPort::SER_BAUD_9600);
-    std::vector<uint8_t> vect = {49,10};
-    for (int i = 0; i < 100; ++i) {
-        serialPort->write_bytes(vect);
-    }
-    while (1);
-    serialPort->disconnect();
 }
