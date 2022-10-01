@@ -11,6 +11,28 @@ void Gui::glfw_error_callback(int error, const char *description)
    std::cerr << "Glfw Error " << std::to_string(error) << description << "\n";
 }
 
+void Gui::calculate_angle_curve(float max, float period)
+{
+    int iterator = 0;
+    for (float i = 0; i<=5; i += 5.0f / curve_samples) {
+        float b = (M_PI * 2) / period;
+        angle_y[iterator] = std::sin(b*i) * max;
+        angle_t[iterator] = i;
+        iterator++;
+    }
+}
+
+void Gui::calculate_angular_velocity_curve()
+{
+    angular_velocity_max = 0;
+    for (int i = 1; i < curve_samples; ++i) {
+        float diff_angle = angle_y[i] - angle_y[i-1];
+        float diff_time = angle_t[i] - angle_t[i-1];
+        angular_velocity[i-1] = diff_angle / diff_time;
+        if (angular_velocity[i-1] > angular_velocity_max)
+            angular_velocity_max = angular_velocity[i-1];
+    }
+}
 
 
 int Gui::main_loop()
@@ -44,7 +66,7 @@ int Gui::main_loop()
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
             ImGui::End();
-
+//######################################################################################################################
 
             ImGui::Begin("PID and Movement Control");
             ImGui::Text("Connect and control the motor in this window");
@@ -79,7 +101,62 @@ int Gui::main_loop()
             else
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
+            ImGui::SliderFloat("Max angle", &max_angle, -180.0f, 180.0f);
+            ImGui::SliderFloat("Period", &time, 0.0f, 5.0f);
+            ImGui::SameLine();
+            ImGui::Text("(Frequency:%f Hz)",1.0f / time);
+            calculate_angle_curve(max_angle, time);
+            calculate_angular_velocity_curve();
+            if(ImPlot::BeginPlot("Motor Angle Curve"))
+            {
+                ImPlot::SetupAxes("Time in seconds", "Angle in degrees");
+                ImPlot::SetupAxesLimits( 0.0, 5.0, max_angle * 2, max_angle * -2,ImPlotCond_Always);
 
+                ImPlot::SetupAxis(ImAxis_Y2, "Angular Velocity in deg/sec^-1", ImPlotAxisFlags_AuxDefault);
+                ImPlot::SetupAxisLimits(ImAxis_Y2, angular_velocity_max * 2, angular_velocity_max * -2, ImPlotCond_Always);
+
+                ImPlot::PlotLine("Angle", angle_t, angle_y, curve_samples);
+                ImPlot::SetAxes(ImAxis_X1, ImAxis_Y2);
+                ImPlot::PlotLine("Angular Velocity", angle_t, angular_velocity, curve_samples);
+
+                ImPlot::EndPlot();
+            }
+            if(ImGui::BeginTable("Curve Information", 2, ImGuiTableFlags_Borders))
+            {
+
+                ImGui::TableSetupColumn("Info");
+                ImGui::TableSetupColumn("Value");
+                ImGui::TableHeadersRow();
+                ImGui::TableNextColumn();
+
+                ImGui::Text("Function");
+                ImGui::TableNextColumn();
+                ImGui::Text("sin");
+                ImGui::TableNextColumn();
+
+                ImGui::Text("Max Angle (degrees)");
+                ImGui::TableNextColumn();
+                ImGui::Text("%f", max_angle);
+                ImGui::TableNextColumn();
+
+                ImGui::Text("Period (s)");
+                ImGui::TableNextColumn();
+                ImGui::Text("%f", time);
+                ImGui::TableNextColumn();
+
+                ImGui::Text("Frequency (Hz)");
+                ImGui::TableNextColumn();
+                ImGui::Text("%f", 1.0f / time);
+                ImGui::TableNextColumn();
+
+                ImGui::Text("Maximum Angular Velocity (deg/sec^-1)");
+                ImGui::TableNextColumn();
+                ImGui::Text("%f", angular_velocity_max);
+                ImGui::TableNextColumn();
+
+
+                ImGui::EndTable();
+            }
 
             ImGui::End();
         }
@@ -95,6 +172,7 @@ int Gui::main_loop()
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
@@ -125,6 +203,7 @@ Gui::Gui()
     glfwSwapInterval(1);
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO& io= ImGui::GetIO(); (void) io;
 
     ImGui::StyleColorsDark();

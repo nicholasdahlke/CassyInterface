@@ -27,9 +27,13 @@ set(sources
         imgui/backends/imgui_impl_glfw.h
         imgui/backends/imgui_impl_opengl3.cpp
         imgui/backends/imgui_impl_opengl3.h
-        Gui.cpp Gui.h)
+        implot/implot.h
+        implot/implot_internal.h
+        implot/implot.cpp
+        implot/implot_items.cpp
+        )
 
 
-add_executable(CassyInterface main.cpp Cassy.h Cassy.cpp SerialPort.cpp SerialPort.h ${sources})
+add_executable(CassyInterface main.cpp Cassy.h Cassy.cpp SerialPort.cpp SerialPort.h Gui.cpp Gui.h ${sources})
 
 target_link_libraries(CassyInterface PRIVATE hidapi::hidapi glfw ${OPENGL_LIBRARIES})

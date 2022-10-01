@@ -246,7 +246,7 @@ std::vector<std::string> SerialPort::get_serial_ports()
     std::string tty_path = "/sys/class/tty";
     for (const auto & entry : std::filesystem::directory_iterator(tty_path))
     {
-        if(std::filesystem::exists(entry.path().string() + "/device"))
+        if(std::filesystem::exists(entry.path().string() + "/device") && entry.path().filename().string().find('S',3) == std::string::npos)
             return_vector.push_back("/dev/" + entry.path().filename().string());
     }
 #endif
