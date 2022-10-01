@@ -241,13 +241,23 @@ std::vector<uint8_t> SerialPort::read_bytes(int length)
 
 std::vector<std::string> SerialPort::get_serial_ports()
 {
-#ifdef linux
     std::vector<std::string> return_vector;
+#ifdef linux
     std::string tty_path = "/sys/class/tty";
     for (const auto & entry : std::filesystem::directory_iterator(tty_path))
     {
         if(std::filesystem::exists(entry.path().string() + "/device"))
             return_vector.push_back("/dev/" + entry.path().filename().string());
+    }
+#endif
+#ifdef _WIN32
+    char lpTargetPath[5000];
+    for (int i = 0; i < 255; ++i) {
+        std::string str = "COM" + std::to_string(i);
+        DWORD test = QueryDosDevice(str.c_str(), lpTargetPath, 5000);
+        if(test != 0)
+            return_vector.push_back(str);
+        if(GetLastError() == ERROR_INSUFFICIENT_BUFFER) {}
     }
 #endif
     return return_vector;
