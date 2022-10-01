@@ -5,7 +5,10 @@
 #include <cstdint>
 
 #ifdef _WIN32
-#define PAUSE "pause"
+#define PAUSE system("pause")
+#endif
+#ifdef linux
+#define PAUSE std::cin.get()
 #endif
 
 int main()
@@ -23,9 +26,10 @@ int main()
 
     SerialPort* serialPort;
     serialPort = new SerialPort("/dev/ttyACM0", SerialPort::SER_BAUD_9600);
-    std::vector<uint8_t> vect(10, 12);
-    serialPort->write_bytes(vect);
-    //std::vector<uint8_t> answer;
-    //answer = serialPort->read_bytes(vect.size());
-
+    std::vector<uint8_t> vect = {49,10};
+    for (int i = 0; i < 100; ++i) {
+        serialPort->write_bytes(vect);
+    }
+    while (1);
+    serialPort->disconnect();
 }

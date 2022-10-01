@@ -98,7 +98,7 @@ int SerialPort::configure_port()
     tty.c_oflag &= ~OPOST; //Disable special handling of output data
     tty.c_oflag &= ~ONLCR; //Prevent newline conversion
     
-    tty.c_cc[VTIME] = 10;  //Set timeout for reading to 1 s (10 deciseconds)
+    tty.c_cc[VTIME] = 10;  //Set timeout for reading in deciseconds
     tty.c_cc[VMIN]  = 0;   //Wait for any byte to be recieved
 
     speed_t baud_rate;
@@ -228,6 +228,17 @@ std::vector<uint8_t> SerialPort::read_bytes(int length)
         }
     }
 #endif
+#ifdef linux
+    int dwRead = 0;
+
+    dwRead = read(serial_handle, &read_buf, sizeof(read_buf));
+    if(dwRead <= 0)
+    {
+        std::cerr << "Error reading data \n";
+        return return_vector;
+    }
+#endif
+
     for(int i = 0; i < length; i++)
     {
         return_vector.push_back(read_buf[i]);
@@ -246,6 +257,7 @@ void SerialPort::disconnect()
 #ifdef linux
     close(serial_handle);
 #endif
+    connected = false;
 }
 
 SerialPort::~SerialPort()
