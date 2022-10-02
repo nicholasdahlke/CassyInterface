@@ -323,6 +323,8 @@ std::vector<std::string> SerialPort::get_serial_ports()
         if(GetLastError() == ERROR_INSUFFICIENT_BUFFER) {}
     }
 #endif
+    if(return_vector.empty())
+        return_vector.push_back("No serial device connected");
     return return_vector;
 }
 

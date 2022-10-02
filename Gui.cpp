@@ -49,7 +49,7 @@ int Gui::main_loop()
             ImGui::Begin("Cassy 2 Control");
             ImGui::Text("Connect and control the cassy in this window.");
 
-            if(cassy_handle->connected == false)
+            if(!cassy_handle->connected)
             {
                 if (ImGui::Button("Connect"))
                     cassy_handle->connect();
@@ -60,21 +60,53 @@ int Gui::main_loop()
                     cassy_handle->disconnect();
             }
             ImGui::SameLine();
-            if(cassy_handle->connected == false)
+            if(!cassy_handle->connected)
                 ImGui::TextColored(ImVec4(1,0,0,1), "Disconnected");
             else
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
             ImGui::Separator();
 
-            if (cassy_handle->connected == true)
+            if (cassy_handle->connected)
             {
+                if(ImGui::BeginTable("Cassy Information", 2, ImGuiTableFlags_Borders))
+                {
+
+                    ImGui::TableSetupColumn("Info");
+                    ImGui::TableSetupColumn("Value");
+                    ImGui::TableHeadersRow();
+                    ImGui::TableNextColumn();
+
+                    ImGui::Text("Number of connected cassys");
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%d", cassy_handle->cassys.size());
+                    ImGui::TableNextColumn();
+
+                    ImGui::Text("Number of relay channels");
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%d", cassy_handle->relays.size());
+                    ImGui::TableNextColumn();
+
+                    ImGui::Text("Number of voltage channels");
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%d", cassy_handle->voltage_channels.size());
+                    ImGui::TableNextColumn();
+
+
+                    ImGui::EndTable();
+                }
                 if (ImGui::BeginTabBar("##tabs"))
                 {
                     for (int i = 0; i <cassy_handle->cassys.size(); ++i) {
                         std::string cassy_name = "Cassy " + std::to_string(i);
                         if(ImGui::BeginTabItem(cassy_name.c_str()))
                         {
+                            std::string relay_name = "Relay " + std::to_string(i);
+                            if(ImGui::Button(std::string("Turn on " + relay_name).c_str()))
+                                cassy_handle->set_relay(cassy_handle->relays[i], true);
+                            ImGui::SameLine();
+                            if(ImGui::Button(std::string("Turn off " + relay_name).c_str()))
+                                cassy_handle->set_relay(cassy_handle->relays[i], false);
                             ImGui::EndTabItem();
                         }
 
@@ -100,7 +132,7 @@ int Gui::main_loop()
                 ImGui::EndCombo();
             }
             ImGui::SameLine();
-            if(serial_handle->connected == false)
+            if(!serial_handle->connected)
             {
                 if (ImGui::Button("Connect"))
                 {
@@ -115,12 +147,12 @@ int Gui::main_loop()
                     serial_handle->disconnect();
             }
             ImGui::SameLine();
-            if(serial_handle->connected == false)
+            if(!serial_handle->connected)
                 ImGui::TextColored(ImVec4(1,0,0,1), "Disconnected");
             else
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
-            if (serial_handle->connected == true)
+            if (serial_handle->connected)
             {
                 ImGui::InputText("##itm", data_to_send, IM_ARRAYSIZE(data_to_send));
                 ImGui::SameLine();
