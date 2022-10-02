@@ -184,7 +184,7 @@ int Cassy::set_relay(Cassy::relay relay_channel, bool value)
         parameters[0] = 0;
     uint8_t res_buf[CASSY_MESSAGE_LENGTH];
     hid_res = send_command(relay_channel.cassy_id, set_relay_value, res_buf, parameters, 1);
-    if (res_buf[1] != parameters[0])
+    if (res_buf[1] != 0x1)
     {
         std::cerr << "Error setting relay\n";
         return -1;

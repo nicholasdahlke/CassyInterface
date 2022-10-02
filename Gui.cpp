@@ -65,12 +65,30 @@ int Gui::main_loop()
             else
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
+            ImGui::Separator();
+
+            if (cassy_handle->connected == true)
+            {
+                if (ImGui::BeginTabBar("##tabs"))
+                {
+                    for (int i = 0; i <cassy_handle->cassys.size(); ++i) {
+                        std::string cassy_name = "Cassy " + std::to_string(i);
+                        if(ImGui::BeginTabItem(cassy_name.c_str()))
+                        {
+                            ImGui::EndTabItem();
+                        }
+
+                    }
+                    ImGui::EndTabBar();
+                }
+            }
+
             ImGui::End();
 //######################################################################################################################
 
             ImGui::Begin("PID and Movement Control");
             ImGui::Text("Connect and control the motor in this window");
-            if(ImGui::BeginCombo("Serial Port", serial_handle->serial_ports[selected_port_index].c_str()))
+            if(ImGui::BeginCombo("##empty", serial_handle->serial_ports[selected_port_index].c_str()))
             {
                 for (int i = 0; i < serial_handle->serial_ports.size(); ++i) {
                     bool isSelected = (selected_port_index == i);
@@ -81,6 +99,7 @@ int Gui::main_loop()
                 }
                 ImGui::EndCombo();
             }
+            ImGui::SameLine();
             if(serial_handle->connected == false)
             {
                 if (ImGui::Button("Connect"))
@@ -101,6 +120,44 @@ int Gui::main_loop()
             else
                 ImGui::TextColored(ImVec4(0,1,0,1), "Connected");
 
+            if (serial_handle->connected == true)
+            {
+                ImGui::InputText("##itm", data_to_send, IM_ARRAYSIZE(data_to_send));
+                ImGui::SameLine();
+                if (ImGui::Button("Send Data")) {
+                    serial_handle->write_bytes(&data_to_send[0], sizeof(data_to_send) / sizeof(char));
+                    strcpy(data_to_send, "");
+                }
+
+
+
+                if(ImGui::BeginCombo("##empty2", commands[selected_command_index].name.c_str()))
+                {
+                    for (int i = 0; i < commands.size(); ++i) {
+                        bool isSelected = (selected_command_index == i);
+                        if(ImGui::Selectable(commands[i].name.c_str(), isSelected))
+                            selected_command_index = i;
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Send Command"))
+                    serial_handle->write_bytes(&commands[selected_command_index].command_id, 1);
+
+                /*int bytes_read = serial_handle->read_bytes(recv_buf, sizeof(recv_buf) / sizeof(uint8_t));
+                char bytes_read_buf[bytes_read];
+                for (int i = 0; i < bytes_read; ++i) {
+                    bytes_read_buf[i] = recv_buf[i];
+                }
+                last_read = &bytes_read_buf[0];
+                last_read_size = bytes_read;
+                ImGui::InputTextMultiline("Recieved data", bytes_read_buf, bytes_read, ImVec2(100,50), ImGuiInputTextFlags_ReadOnly);
+                */
+            }
+
+            ImGui::Separator();
             ImGui::SliderFloat("Max angle", &max_angle, -180.0f, 180.0f);
             ImGui::SliderFloat("Period", &time, 0.0f, 5.0f);
             ImGui::SameLine();
@@ -154,10 +211,14 @@ int Gui::main_loop()
                 ImGui::Text("%f", angular_velocity_max);
                 ImGui::TableNextColumn();
 
-
                 ImGui::EndTable();
             }
+            ImGui::Separator();
+            ImGui::End();
 
+//######################################################################################################################
+            ImGui::Begin("ImGui Metrics");
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
         ImGui::Render();
@@ -178,6 +239,20 @@ int Gui::main_loop()
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
+}
+
+void Gui::set_serial_commands()
+{
+    serialCommand turn_on_led;
+    turn_on_led.name = "Turn on led";
+    turn_on_led.command_id = 97;
+
+    serialCommand turn_off_led;
+    turn_off_led.name = "Turn off led";
+    turn_off_led.command_id = 98;
+
+    commands.push_back(turn_on_led);
+    commands.push_back(turn_off_led);
 }
 
 Gui::Gui()
@@ -213,4 +288,5 @@ Gui::Gui()
     clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     cassy_handle = new Cassy();
     serial_handle = new SerialPort();
+    set_serial_commands();
 }

@@ -42,7 +42,9 @@ public:
     ~SerialPort();
 
     int write_bytes(std::vector<uint8_t> data);
+    int write_bytes(char* data, int length);
     std::vector<uint8_t> read_bytes(int length);
+    int read_bytes(uint8_t * buf, int length);
     int connect();
     void disconnect();
 

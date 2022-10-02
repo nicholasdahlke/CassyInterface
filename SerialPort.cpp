@@ -98,7 +98,7 @@ int SerialPort::connect()
     tty.c_oflag &= ~OPOST; //Disable special handling of output data
     tty.c_oflag &= ~ONLCR; //Prevent newline conversion
     
-    tty.c_cc[VTIME] = 10;  //Set timeout for reading in deciseconds
+    tty.c_cc[VTIME] = 0;  //Set timeout for reading in deciseconds
     tty.c_cc[VMIN]  = 0;   //Wait for any byte to be recieved
 
     speed_t baud_rate;
@@ -202,6 +202,42 @@ int SerialPort::write_bytes(std::vector<uint8_t> data)
 #endif
     return dwWrite;
 }
+int SerialPort::write_bytes(char* data, int length)
+{
+
+#ifdef _WIN32
+    DWORD dwWrite = 0;
+
+    if(!WriteFile(serial_handle, data, length, &dwWrite, NULL))
+    {
+        std::cerr << "Error writing data\n";
+        return -1;
+    }
+
+    if(dwWrite != length)
+    {
+        std::cerr << "None or not all bytes written\n";
+        return -2;
+    }
+#endif
+#ifdef linux
+    int dwWrite = 0;
+    dwWrite = write(serial_handle, data, sizeof(data));
+
+    if(dwWrite <= 0)
+    {
+        std::cerr << "Error writing to serial port\n";
+        return -1;
+    }
+    if (dwWrite != sizeof(data))
+    {
+        std::cerr << "None or not all bytes written";
+        return -1;
+    }
+#endif
+    return dwWrite;
+}
+
 
 std::vector<uint8_t> SerialPort::read_bytes(int length)
 {
@@ -238,6 +274,33 @@ std::vector<uint8_t> SerialPort::read_bytes(int length)
 
     return return_vector;
 }
+
+int SerialPort::read_bytes(uint8_t *buf, int length)
+{
+#ifdef _WIN32
+    DWORD dwRead = 0;
+    while(dwRead == 0)
+    {
+        if(!ReadFile(serial_handle, buf, length, &dwRead, NULL))
+        {
+            std::cerr << "Error reading data \n";
+            return -1;
+        }
+    }
+#endif
+#ifdef linux
+    int dwRead = 0;
+
+    dwRead = read(serial_handle, buf, length);
+    if(dwRead < 0)
+    {
+        std::cerr << "Error reading data \n";
+        return -1;
+    }
+#endif
+    return dwRead;
+}
+
 
 std::vector<std::string> SerialPort::get_serial_ports()
 {
