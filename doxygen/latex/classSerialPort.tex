@@ -1,0 +1,68 @@
+\hypertarget{classSerialPort}{}\doxysection{Serial\+Port Class Reference}
+\label{classSerialPort}\index{SerialPort@{SerialPort}}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classSerialPort_a9a22ca5da9536043b07f517e70e67132}\label{classSerialPort_a9a22ca5da9536043b07f517e70e67132}} 
+enum {\bfseries Baud\+Rate} \{ \newline
+{\bfseries SER\+\_\+\+BAUD\+\_\+110} = 100
+, {\bfseries SER\+\_\+\+BAUD\+\_\+300} = 300
+, {\bfseries SER\+\_\+\+BAUD\+\_\+600} = 600
+, {\bfseries SER\+\_\+\+BAUD\+\_\+1200} = 1200
+, \newline
+{\bfseries SER\+\_\+\+BAUD\+\_\+2400} = 2400
+, {\bfseries SER\+\_\+\+BAUD\+\_\+4800} = 4800
+, {\bfseries SER\+\_\+\+BAUD\+\_\+9600} = 9600
+, {\bfseries SER\+\_\+\+BAUD\+\_\+14400} = 14400
+, \newline
+{\bfseries SER\+\_\+\+BAUD\+\_\+19200} = 19200
+, {\bfseries SER\+\_\+\+BAUD\+\_\+38400} = 38400
+, {\bfseries SER\+\_\+\+BAUD\+\_\+57600} = 57600
+, {\bfseries SER\+\_\+\+BAUD\+\_\+115200} = 115200
+, \newline
+{\bfseries SER\+\_\+\+BAUD\+\_\+128000} = 128000
+, {\bfseries SER\+\_\+\+BAUD\+\_\+256000} = 256000
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classSerialPort_ad7e070e1624967fd92809cf11c6306b5}\label{classSerialPort_ad7e070e1624967fd92809cf11c6306b5}} 
+int {\bfseries write\+\_\+bytes} (std\+::vector$<$ uint8\+\_\+t $>$ data)
+\item 
+\mbox{\Hypertarget{classSerialPort_a0796c1ebb1d0aecc1170fdef1f6d3d7e}\label{classSerialPort_a0796c1ebb1d0aecc1170fdef1f6d3d7e}} 
+int {\bfseries write\+\_\+bytes} (char $\ast$data, int length)
+\item 
+\mbox{\Hypertarget{classSerialPort_aa108a62fc8eedaf77e4e0516da014393}\label{classSerialPort_aa108a62fc8eedaf77e4e0516da014393}} 
+std\+::vector$<$ uint8\+\_\+t $>$ {\bfseries read\+\_\+bytes} (int length)
+\item 
+\mbox{\Hypertarget{classSerialPort_a77ea5c944f8fe11344f53fc23df86082}\label{classSerialPort_a77ea5c944f8fe11344f53fc23df86082}} 
+int {\bfseries read\+\_\+bytes} (uint8\+\_\+t $\ast$buf, int length)
+\item 
+\mbox{\Hypertarget{classSerialPort_ab2c21a4174039f1bddc85b936bdb59c3}\label{classSerialPort_ab2c21a4174039f1bddc85b936bdb59c3}} 
+int {\bfseries connect} ()
+\item 
+\mbox{\Hypertarget{classSerialPort_a57ab0586b38c039faed8e0cb95592cf3}\label{classSerialPort_a57ab0586b38c039faed8e0cb95592cf3}} 
+void {\bfseries disconnect} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classSerialPort_ac53ad4309314d41ece1984e65c1abda9}\label{classSerialPort_ac53ad4309314d41ece1984e65c1abda9}} 
+std\+::vector$<$ std\+::string $>$ {\bfseries serial\+\_\+ports}
+\item 
+\mbox{\Hypertarget{classSerialPort_a93a3839f2ed13ec4fa2bb32b5c292ec9}\label{classSerialPort_a93a3839f2ed13ec4fa2bb32b5c292ec9}} 
+bool {\bfseries connected} = false
+\item 
+\mbox{\Hypertarget{classSerialPort_ab4fa342d66510810b8c4678cb093c3d4}\label{classSerialPort_ab4fa342d66510810b8c4678cb093c3d4}} 
+std\+::string {\bfseries serial\+\_\+port\+\_\+name}
+\item 
+\mbox{\Hypertarget{classSerialPort_a72e01449b9d18add31e914b9d87a7cac}\label{classSerialPort_a72e01449b9d18add31e914b9d87a7cac}} 
+Baud\+Rate {\bfseries baud}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/nicholas/\+CLion\+Projects/\+Cassy\+Interface/Serial\+Port.\+h\item 
+/home/nicholas/\+CLion\+Projects/\+Cassy\+Interface/Serial\+Port.\+cpp\end{DoxyCompactItemize}

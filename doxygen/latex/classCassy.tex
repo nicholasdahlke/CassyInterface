@@ -1,0 +1,72 @@
+\hypertarget{classCassy}{}\doxysection{Cassy Class Reference}
+\label{classCassy}\index{Cassy@{Cassy}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structCassy_1_1relay}{relay}}
+\item 
+struct \mbox{\hyperlink{structCassy_1_1voltage__channel}{voltage\+\_\+channel}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classCassy_a7401ea3d0a5794f03bea9f9bf8a18f1b}\label{classCassy_a7401ea3d0a5794f03bea9f9bf8a18f1b}} 
+enum {\bfseries Cassy\+Voltage\+Ranges} \{ \newline
+{\bfseries v1} = 137
+, {\bfseries v2} = 136
+, {\bfseries v3} = 168
+, {\bfseries v4} = 200
+, \newline
+{\bfseries v5} = 232
+, {\bfseries v6} = 192
+, {\bfseries v7} = 224
+, {\bfseries v8} = 143
+ \}
+\item 
+\mbox{\Hypertarget{classCassy_a4ff26c8afd2087de2ffcea8c07cb9e04}\label{classCassy_a4ff26c8afd2087de2ffcea8c07cb9e04}} 
+enum {\bfseries input} \{ {\bfseries a}
+, {\bfseries b}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classCassy_a9fa20c54ef2bb01840acc97d84b436b4}\label{classCassy_a9fa20c54ef2bb01840acc97d84b436b4}} 
+bool {\bfseries connect} ()
+\item 
+\mbox{\Hypertarget{classCassy_a86d5b09c9e916da14eac45cfa7081ee2}\label{classCassy_a86d5b09c9e916da14eac45cfa7081ee2}} 
+void {\bfseries disconnect} ()
+\item 
+\mbox{\Hypertarget{classCassy_a659e0c8b92332ea27caeea73e355ce60}\label{classCassy_a659e0c8b92332ea27caeea73e355ce60}} 
+float {\bfseries read\+\_\+voltage} (\mbox{\hyperlink{structCassy_1_1voltage__channel}{voltage\+\_\+channel}} channel, Cassy\+Voltage\+Ranges range)
+\item 
+\mbox{\Hypertarget{classCassy_a27d2b0764cffc44d5e7f97790fb5ba25}\label{classCassy_a27d2b0764cffc44d5e7f97790fb5ba25}} 
+int {\bfseries set\+\_\+relay} (\mbox{\hyperlink{structCassy_1_1relay}{relay}} relay\+\_\+channel, bool value)
+\item 
+\mbox{\Hypertarget{classCassy_a787baf8fe9e07fd406081496f3f83eb8}\label{classCassy_a787baf8fe9e07fd406081496f3f83eb8}} 
+void {\bfseries print\+\_\+voltage\+\_\+channels} ()
+\item 
+\mbox{\Hypertarget{classCassy_a3c37d2148b1558478661f791f5debae7}\label{classCassy_a3c37d2148b1558478661f791f5debae7}} 
+void {\bfseries print\+\_\+relays} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classCassy_af18fdc6157fd9d540c283c97c128c553}\label{classCassy_af18fdc6157fd9d540c283c97c128c553}} 
+std\+::vector$<$ \mbox{\hyperlink{structCassy_1_1voltage__channel}{voltage\+\_\+channel}} $>$ {\bfseries voltage\+\_\+channels}
+\item 
+\mbox{\Hypertarget{classCassy_a9ddcd2d4c40ca127007fa5d954f2713e}\label{classCassy_a9ddcd2d4c40ca127007fa5d954f2713e}} 
+std\+::vector$<$ \mbox{\hyperlink{structCassy_1_1relay}{relay}} $>$ {\bfseries relays}
+\item 
+\mbox{\Hypertarget{classCassy_ac3b6cc992926f8875711e9be6d5cd582}\label{classCassy_ac3b6cc992926f8875711e9be6d5cd582}} 
+std\+::vector$<$ uint8\+\_\+t $>$ {\bfseries cassys}
+\item 
+\mbox{\Hypertarget{classCassy_a4630c96957cfd91c8b17ef725812e076}\label{classCassy_a4630c96957cfd91c8b17ef725812e076}} 
+bool {\bfseries connected} = false
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/nicholas/\+CLion\+Projects/\+Cassy\+Interface/Cassy.\+h\item 
+/home/nicholas/\+CLion\+Projects/\+Cassy\+Interface/Cassy.\+cpp\end{DoxyCompactItemize}

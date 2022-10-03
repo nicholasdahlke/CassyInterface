@@ -31,6 +31,7 @@ private:
     SerialPort* serial_handle;
     int selected_port_index = 0;
     int selected_command_index = 0;
+    int selected_function_index = 0;
     static constexpr int curve_samples = 360 * 4;
     float angle_y[curve_samples];
     float angle_t[curve_samples];
@@ -38,16 +39,29 @@ private:
     float angular_velocity_max = 0;
     float max_angle = 1;
     float time = 1;
-
     char data_to_send[128] = "";
 
+    std::vector<std::string> functions;
 
     std::vector<serialCommand> commands;
 
     static void glfw_error_callback(int error, const char* description);
-    void calculate_angle_curve(float max, float period);
+    void calculate_angle_curve_sin(float max, float period);
+    void calculate_angle_curve_linear(float max);
     void calculate_angular_velocity_curve();
     void set_serial_commands();
+    void set_functions();
+
+    enum Commands{
+        start_motor = 0x1,
+        stop_motor = 0x2,
+        forward = 0x3,
+        reverse = 0x4,
+        rpm_plus = 0x5,
+        rpm_minus = 0x6
+    };
+
+    void send_serial_command(Commands command);
 };
 
 

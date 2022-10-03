@@ -11,29 +11,6 @@ void Gui::glfw_error_callback(int error, const char *description)
    std::cerr << "Glfw Error " << std::to_string(error) << description << "\n";
 }
 
-void Gui::calculate_angle_curve(float max, float period)
-{
-    int iterator = 0;
-    for (float i = 0; i<=5; i += 5.0f / curve_samples) {
-        float b = (M_PI * 2) / period;
-        angle_y[iterator] = std::sin(b*i) * max;
-        angle_t[iterator] = i;
-        iterator++;
-    }
-}
-
-void Gui::calculate_angular_velocity_curve()
-{
-    angular_velocity_max = 0;
-    for (int i = 1; i < curve_samples; ++i) {
-        float diff_angle = angle_y[i] - angle_y[i-1];
-        float diff_time = angle_t[i] - angle_t[i-1];
-        angular_velocity[i-1] = diff_angle / diff_time;
-        if (angular_velocity[i-1] > angular_velocity_max)
-            angular_velocity_max = angular_velocity[i-1];
-    }
-}
-
 
 int Gui::main_loop()
 {
@@ -79,17 +56,17 @@ int Gui::main_loop()
 
                     ImGui::Text("Number of connected cassys");
                     ImGui::TableNextColumn();
-                    ImGui::Text("%d", cassy_handle->cassys.size());
+                    ImGui::Text("%d", static_cast<int>(cassy_handle->cassys.size()));
                     ImGui::TableNextColumn();
 
                     ImGui::Text("Number of relay channels");
                     ImGui::TableNextColumn();
-                    ImGui::Text("%d", cassy_handle->relays.size());
+                    ImGui::Text("%d", static_cast<int>(cassy_handle->relays.size()));
                     ImGui::TableNextColumn();
 
                     ImGui::Text("Number of voltage channels");
                     ImGui::TableNextColumn();
-                    ImGui::Text("%d", cassy_handle->voltage_channels.size());
+                    ImGui::Text("%d", static_cast<int>(cassy_handle->voltage_channels.size()));
                     ImGui::TableNextColumn();
 
 
@@ -161,8 +138,6 @@ int Gui::main_loop()
                     strcpy(data_to_send, "");
                 }
 
-
-
                 if(ImGui::BeginCombo("##empty2", commands[selected_command_index].name.c_str()))
                 {
                     for (int i = 0; i < commands.size(); ++i) {
@@ -194,7 +169,23 @@ int Gui::main_loop()
             ImGui::SliderFloat("Period", &time, 0.0f, 5.0f);
             ImGui::SameLine();
             ImGui::Text("(Frequency:%f Hz)",1.0f / time);
-            calculate_angle_curve(max_angle, time);
+
+            if(ImGui::BeginCombo("Function Type", functions[selected_function_index].c_str()))
+            {
+                for (int i = 0; i <functions.size(); ++i) {
+                    bool isSelected = (selected_function_index == i);
+                    if(ImGui::Selectable(functions[i].c_str(), isSelected))
+                        selected_function_index = i;
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
+            if(selected_function_index == 0)
+                calculate_angle_curve_sin(max_angle, time);
+            if(selected_function_index == 1)
+                calculate_angle_curve_linear(max_angle);
             calculate_angular_velocity_curve();
             if(ImPlot::BeginPlot("Motor Angle Curve"))
             {
@@ -202,7 +193,7 @@ int Gui::main_loop()
                 ImPlot::SetupAxesLimits( 0.0, 5.0, max_angle * 2, max_angle * -2,ImPlotCond_Always);
 
                 ImPlot::SetupAxis(ImAxis_Y2, "Angular Velocity in deg/sec^-1", ImPlotAxisFlags_AuxDefault);
-                ImPlot::SetupAxisLimits(ImAxis_Y2, angular_velocity_max * 2, angular_velocity_max * -2, ImPlotCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y2, angular_velocity_max * 2 + 0.5, angular_velocity_max * -2 - 0.5, ImPlotCond_Always);
 
                 ImPlot::PlotLine("Angle", angle_t, angle_y, curve_samples);
                 ImPlot::SetAxes(ImAxis_X1, ImAxis_Y2);
@@ -220,7 +211,7 @@ int Gui::main_loop()
 
                 ImGui::Text("Function");
                 ImGui::TableNextColumn();
-                ImGui::Text("sin");
+                ImGui::Text("%s" , functions[selected_function_index].c_str());
                 ImGui::TableNextColumn();
 
                 ImGui::Text("Max Angle (degrees)");
@@ -246,6 +237,36 @@ int Gui::main_loop()
                 ImGui::EndTable();
             }
             ImGui::Separator();
+
+            if (serial_handle->connected) {
+                ImGui::Text("Manual Motor Control");
+
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
+                if (ImGui::Button("Start Motor")) {}
+                ImGui::PopStyleColor();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
+                if (ImGui::Button("Stop Motor")) {}
+                ImGui::PopStyleColor();
+
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(1, 0));
+                ImGui::SameLine();
+
+                if (ImGui::Button("Forward 10°")) {}
+                ImGui::SameLine();
+                if (ImGui::Button("Reverse 10°")) {}
+
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(1, 0));
+                ImGui::SameLine();
+
+                if (ImGui::Button("RPM +10")) {}
+                ImGui::SameLine();
+                if (ImGui::Button("RPM -10")) {}
+            }
             ImGui::End();
 
 //######################################################################################################################
@@ -287,6 +308,49 @@ void Gui::set_serial_commands()
     commands.push_back(turn_off_led);
 }
 
+void Gui::set_functions()
+{
+    functions.push_back("sin(x)");
+    functions.push_back("x");
+}
+
+void Gui::calculate_angle_curve_sin(float max, float period)
+{
+    int iterator = 0;
+    for (float i = 0; i<=5; i += 5.0f / curve_samples) {
+        float b = (M_PI * 2) / period;
+        angle_y[iterator] = std::sin(b*i) * max;
+        angle_t[iterator] = i;
+        iterator++;
+    }
+}
+
+void Gui::calculate_angle_curve_linear(float max)
+{
+    int iterator = 0;
+    for (float i = 0; i<=5; i += 5.0f / curve_samples) {
+        angle_y[iterator] = max_angle;
+        angle_t[iterator] = i;
+        iterator++;
+    }
+}
+
+void Gui::calculate_angular_velocity_curve()
+{
+    angular_velocity_max = 0;
+    for (int i = 1; i < curve_samples; ++i) {
+        float diff_angle = angle_y[i] - angle_y[i-1];
+        float diff_time = angle_t[i] - angle_t[i-1];
+        if(diff_angle == 0.0f)
+            angular_velocity[i-1] = 0;
+        else
+            angular_velocity[i-1] = diff_angle / diff_time;
+        if (angular_velocity[i-1] > angular_velocity_max)
+            angular_velocity_max = angular_velocity[i-1];
+    }
+}
+
+
 Gui::Gui()
 {
     glfwSetErrorCallback(glfw_error_callback);
@@ -321,4 +385,5 @@ Gui::Gui()
     cassy_handle = new Cassy();
     serial_handle = new SerialPort();
     set_serial_commands();
+    set_functions();
 }
