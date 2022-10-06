@@ -32,7 +32,7 @@ private:
     int selected_port_index = 0;
     int selected_command_index = 0;
     int selected_function_index = 0;
-    static constexpr int curve_samples = 360 * 4;
+    static const int curve_samples = 360;
     float angle_y[curve_samples];
     float angle_t[curve_samples];
     float angular_velocity[curve_samples];
@@ -52,16 +52,7 @@ private:
     void set_serial_commands();
     void set_functions();
 
-    enum Commands{
-        start_motor = 0x1,
-        stop_motor = 0x2,
-        forward = 0x3,
-        reverse = 0x4,
-        rpm_plus = 0x5,
-        rpm_minus = 0x6
-    };
-
-    void send_serial_command(Commands command);
+    void send_serial_command(serialCommand command, SerialPort * port);
 };
 
 

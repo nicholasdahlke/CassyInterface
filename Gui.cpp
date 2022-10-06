@@ -34,7 +34,11 @@ int Gui::main_loop()
             else
             {
                 if (ImGui::Button("Disconnect"))
+                {
                     cassy_handle->disconnect();
+                    delete cassy_handle;
+                    cassy_handle = new Cassy();
+                }
             }
             ImGui::SameLine();
             if(!cassy_handle->connected)
@@ -242,13 +246,16 @@ int Gui::main_loop()
                 ImGui::Text("Manual Motor Control");
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
-                if (ImGui::Button("Start Motor")) {}
+                if (ImGui::Button(commands[1].name.c_str()))
+                    send_serial_command(commands[3], serial_handle);
+
                 ImGui::PopStyleColor();
 
                 ImGui::SameLine();
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
-                if (ImGui::Button("Stop Motor")) {}
+                if (ImGui::Button(commands[0].name.c_str()))
+                    send_serial_command(commands[2], serial_handle);
                 ImGui::PopStyleColor();
 
                 ImGui::SameLine();
@@ -304,8 +311,29 @@ void Gui::set_serial_commands()
     turn_off_led.name = "Turn off led";
     turn_off_led.command_id = 98;
 
-    commands.push_back(turn_on_led);
-    commands.push_back(turn_off_led);
+    serialCommand motor_on;
+    motor_on.name = "Turn on motor";
+    motor_on.command_id = 99;
+
+    serialCommand motor_off;
+    motor_off.name = "Turn off motor";
+    motor_off.command_id = 100;
+
+    serialCommand rpm_plus;
+
+
+    commands.push_back(motor_on); //0
+    commands.push_back(motor_off); //1
+    commands.push_back(turn_on_led); //2
+    commands.push_back(turn_off_led); //3
+}
+
+void Gui::send_serial_command(serialCommand command, SerialPort * port)
+{
+    if(port->connected)
+        port->write_bytes(&command.command_id, 1);
+
+
 }
 
 void Gui::set_functions()
