@@ -156,16 +156,6 @@ int Gui::main_loop()
                 ImGui::SameLine();
                 if (ImGui::Button("Send Command"))
                     serial_handle->write_bytes(&commands[selected_command_index].command_id, 1);
-
-                /*int bytes_read = serial_handle->read_bytes(recv_buf, sizeof(recv_buf) / sizeof(uint8_t));
-                char bytes_read_buf[bytes_read];
-                for (int i = 0; i < bytes_read; ++i) {
-                    bytes_read_buf[i] = recv_buf[i];
-                }
-                last_read = &bytes_read_buf[0];
-                last_read_size = bytes_read;
-                ImGui::InputTextMultiline("Recieved data", bytes_read_buf, bytes_read, ImVec2(100,50), ImGuiInputTextFlags_ReadOnly);
-                */
             }
 
             ImGui::Separator();
@@ -205,6 +195,9 @@ int Gui::main_loop()
 
                 ImPlot::EndPlot();
             }
+
+
+
             if(ImGui::BeginTable("Curve Information", 2, ImGuiTableFlags_Borders))
             {
 
@@ -243,36 +236,20 @@ int Gui::main_loop()
             ImGui::Separator();
 
             if (serial_handle->connected) {
-                ImGui::Text("Manual Motor Control");
+                ImGui::Text("Motor Control");
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
-                if (ImGui::Button(commands[1].name.c_str()))
-                    send_serial_command(commands[3], serial_handle);
+                if (ImGui::Button(commands[motor_on].name.c_str()))
+                    send_serial_command(commands[motor_on]);
 
                 ImGui::PopStyleColor();
 
                 ImGui::SameLine();
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
-                if (ImGui::Button(commands[0].name.c_str()))
-                    send_serial_command(commands[2], serial_handle);
+                if (ImGui::Button(commands[motor_off].name.c_str()))
+                    send_serial_command(commands[motor_off]);
                 ImGui::PopStyleColor();
-
-                ImGui::SameLine();
-                ImGui::Dummy(ImVec2(1, 0));
-                ImGui::SameLine();
-
-                if (ImGui::Button("Forward 10°")) {}
-                ImGui::SameLine();
-                if (ImGui::Button("Reverse 10°")) {}
-
-                ImGui::SameLine();
-                ImGui::Dummy(ImVec2(1, 0));
-                ImGui::SameLine();
-
-                if (ImGui::Button("RPM +10")) {}
-                ImGui::SameLine();
-                if (ImGui::Button("RPM -10")) {}
             }
             ImGui::End();
 
@@ -312,28 +289,45 @@ void Gui::set_serial_commands()
     turn_off_led.command_id = 98;
 
     serialCommand motor_on;
-    motor_on.name = "Turn on motor";
+    motor_on.name = "Start movement";
     motor_on.command_id = 99;
 
     serialCommand motor_off;
-    motor_off.name = "Turn off motor";
+    motor_off.name = "Stop movement";
     motor_off.command_id = 100;
 
-    serialCommand rpm_plus;
+    serialCommand send_period;
+    send_period.name = "Send rotational period (Argument required)";
+    send_period.command_id = 97;
+
+    serialCommand send_max_angle;
+    send_max_angle.name = "Send max angle (Argument required)";
+    send_max_angle.command_id = 98;
 
 
     commands.push_back(motor_on); //0
     commands.push_back(motor_off); //1
     commands.push_back(turn_on_led); //2
     commands.push_back(turn_off_led); //3
+    commands.push_back(send_period); //4
+    commands.push_back(send_max_angle); //5
 }
 
-void Gui::send_serial_command(serialCommand command, SerialPort * port)
+void Gui::send_serial_command(serialCommand command)
 {
-    if(port->connected)
-        port->write_bytes(&command.command_id, 1);
+    if(serial_handle->connected)
+        serial_handle->write_bytes(&command.command_id, 1);
+}
 
-
+void Gui::send_serial_parameters(serialCommand command, float parameter)
+{
+    int message_length = sizeof(std::to_string(parameter).c_str()) + 1;
+    char buf[message_length];
+    buf[0] = command.command_id;
+    char parameter_str[message_length - 1];
+    strcpy(parameter_str, std::to_string(parameter).c_str());
+    strcpy(&buf[1], parameter_str);
+    serial_handle->write_bytes(buf, message_length);
 }
 
 void Gui::set_functions()

@@ -31,6 +31,8 @@ set(sources
         implot/implot_internal.h
         implot/implot.cpp
         implot/implot_items.cpp
+        imgui-knobs/imgui-knobs.cpp
+        imgui-knobs/imgui-knobs.h
         )
 
 

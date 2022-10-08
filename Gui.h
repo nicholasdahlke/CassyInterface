@@ -8,6 +8,7 @@
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "implot/implot.h"
+#include "imgui-knobs/imgui-knobs.h"
 #include <GLFW/glfw3.h>
 #include "Cassy.h"
 #include "SerialPort.h"
@@ -51,8 +52,19 @@ private:
     void calculate_angular_velocity_curve();
     void set_serial_commands();
     void set_functions();
+    void send_serial_parameters(serialCommand command, float paramter);
 
-    void send_serial_command(serialCommand command, SerialPort * port);
+    void send_serial_command(serialCommand command);
+
+    enum commands_index
+    {
+        motor_on,
+        motor_off,
+        turn_on_led,
+        turn_off_led,
+        send_period,
+        send_max_angle
+    };
 };
 
 
