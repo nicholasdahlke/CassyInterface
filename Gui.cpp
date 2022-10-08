@@ -241,7 +241,6 @@ int Gui::main_loop()
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
                 if (ImGui::Button(commands[motor_on].name.c_str()))
                     send_serial_command(commands[motor_on]);
-
                 ImGui::PopStyleColor();
 
                 ImGui::SameLine();
@@ -250,6 +249,17 @@ int Gui::main_loop()
                 if (ImGui::Button(commands[motor_off].name.c_str()))
                     send_serial_command(commands[motor_off]);
                 ImGui::PopStyleColor();
+
+
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(1, 0));
+                ImGui::SameLine();
+
+                if(ImGui::Button("Send movement data"))
+                {
+                    send_serial_parameters(commands[send_period], time);
+                    send_serial_parameters(commands[send_max_angle], max_angle);
+                }
             }
             ImGui::End();
 

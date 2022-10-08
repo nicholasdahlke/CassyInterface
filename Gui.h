@@ -8,7 +8,6 @@
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "implot/implot.h"
-#include "imgui-knobs/imgui-knobs.h"
 #include <GLFW/glfw3.h>
 #include "Cassy.h"
 #include "SerialPort.h"
@@ -33,7 +32,7 @@ private:
     int selected_port_index = 0;
     int selected_command_index = 0;
     int selected_function_index = 0;
-    static const int curve_samples = 360;
+    static constexpr int curve_samples = 360 * 4;
     float angle_y[curve_samples];
     float angle_t[curve_samples];
     float angular_velocity[curve_samples];
