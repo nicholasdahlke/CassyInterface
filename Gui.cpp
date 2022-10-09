@@ -155,7 +155,7 @@ int Gui::main_loop()
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Send Command"))
-                    serial_handle->write_bytes(&commands[selected_command_index].command_id, 1);
+                    send_serial_command(commands[selected_command_index]);
             }
 
             ImGui::Separator();
@@ -238,6 +238,14 @@ int Gui::main_loop()
             if (serial_handle->connected) {
                 ImGui::Text("Motor Control");
 
+                if(ImGui::Button("Send movement data"))
+                {
+                    send_serial_parameters(commands[send_period], time);
+                    send_serial_parameters(commands[send_max_angle], max_angle);
+                }
+
+                ImGui::SameLine();
+
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
                 if (ImGui::Button(commands[motor_on].name.c_str()))
                     send_serial_command(commands[motor_on]);
@@ -255,11 +263,29 @@ int Gui::main_loop()
                 ImGui::Dummy(ImVec2(1, 0));
                 ImGui::SameLine();
 
-                if(ImGui::Button("Send movement data"))
-                {
-                    send_serial_parameters(commands[send_period], time);
-                    send_serial_parameters(commands[send_max_angle], max_angle);
+
+
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(1, 0));
+                ImGui::SameLine();
+
+                if(ImGui::Button(commands[move_forward].name.c_str()))
+                    int a;
+                ImGui::SameLine();
+                if(ImGui::Button(commands[move_backwards].name.c_str()))
+                    int b;
+
+                ImGui::SameLine();
+
+                ImGui::InputFloat("Movement size", &manual_movement_size, 0.0f, 0.0f,  "%4.2f°");
+                ImGui::SameLine();
+                ImGui::Dummy(ImVec2(20, 0));
+
+                ImGui::BeginChild("Scrolling", ImVec2(0,0), true);
+                for (int i = 0; i < serial_data.size(); ++i) {
+                    ImGui::Text(serial_data[i].c_str());
                 }
+                ImGui::EndChild();
             }
             ImGui::End();
 
@@ -314,6 +340,17 @@ void Gui::set_serial_commands()
     send_max_angle.name = "Send max angle (Argument required)";
     send_max_angle.command_id = 98;
 
+    serialCommand send_manual_movement;
+    send_max_angle.name = "Send manual step size (Argument required)";
+    send_max_angle.command_id = 103;
+
+    serialCommand move_forward;
+    move_forward.name = "Move forward";
+    move_forward.command_id = 101;
+
+    serialCommand move_backwards;
+    move_backwards.name = "Move backwards";
+    move_backwards.command_id = 101;
 
     commands.push_back(motor_on); //0
     commands.push_back(motor_off); //1
@@ -321,12 +358,17 @@ void Gui::set_serial_commands()
     commands.push_back(turn_off_led); //3
     commands.push_back(send_period); //4
     commands.push_back(send_max_angle); //5
+    commands.push_back(send_manual_movement); //6
+    commands.push_back(move_forward); //7
+    commands.push_back(move_backwards); //8
 }
 
 void Gui::send_serial_command(serialCommand command)
 {
-    if(serial_handle->connected)
+    if(serial_handle->connected) {
         serial_handle->write_bytes(&command.command_id, 1);
+        serial_data.push_back("Send: " + std::to_string(command.command_id));
+    }
 }
 
 void Gui::send_serial_parameters(serialCommand command, float parameter)
@@ -338,6 +380,7 @@ void Gui::send_serial_parameters(serialCommand command, float parameter)
     strcpy(parameter_str, std::to_string(parameter).c_str());
     strcpy(&buf[1], parameter_str);
     serial_handle->write_bytes(buf, message_length);
+    serial_data.push_back("Send: " + std::to_string(buf[0]) + " " + std::string(&buf[1]));
 }
 
 void Gui::set_functions()

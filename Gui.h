@@ -39,9 +39,11 @@ private:
     float angular_velocity_max = 0;
     float max_angle = 1;
     float time = 1;
+    float manual_movement_size = 10;
     char data_to_send[128] = "";
 
     std::vector<std::string> functions;
+    std::vector<std::string> serial_data;
 
     std::vector<serialCommand> commands;
 
@@ -62,7 +64,10 @@ private:
         turn_on_led,
         turn_off_led,
         send_period,
-        send_max_angle
+        send_max_angle,
+        send_manual_movement,
+        move_forward,
+        move_backwards
     };
 };
 
