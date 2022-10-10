@@ -53,8 +53,10 @@ private:
     void calculate_angular_velocity_curve();
     void set_serial_commands();
     void set_functions();
-    void send_serial_parameters(serialCommand command, float parameter);
 
+    void read_serial();
+
+    void send_serial_parameters(serialCommand command, float parameter);
     void send_serial_command(serialCommand command);
 
     enum commands_index

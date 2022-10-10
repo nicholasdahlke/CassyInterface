@@ -270,17 +270,21 @@ int Gui::main_loop()
                 ImGui::SameLine();
 
                 if(ImGui::Button(commands[move_forward].name.c_str()))
-                    int a;
+                {
+                    send_serial_parameters(commands[send_manual_movement], manual_movement_size);
+                    send_serial_command(commands[move_forward]);
+                }
                 ImGui::SameLine();
                 if(ImGui::Button(commands[move_backwards].name.c_str()))
-                    int b;
+                {
+                    send_serial_parameters(commands[send_manual_movement], manual_movement_size);
+                    send_serial_command(commands[move_backwards]);
+                }
 
                 ImGui::SameLine();
 
                 ImGui::InputFloat("Movement size", &manual_movement_size, 0.0f, 0.0f,  "%4.2f°");
-                ImGui::SameLine();
-                ImGui::Dummy(ImVec2(20, 0));
-
+                read_serial();
                 ImGui::BeginChild("Scrolling", ImVec2(0,0), true);
                 for (int i = 0; i < serial_data.size(); ++i) {
                     ImGui::Text(serial_data[i].c_str());
@@ -341,8 +345,8 @@ void Gui::set_serial_commands()
     send_max_angle.command_id = 98;
 
     serialCommand send_manual_movement;
-    send_max_angle.name = "Send manual step size (Argument required)";
-    send_max_angle.command_id = 103;
+    send_manual_movement.name = "Send manual step size (Argument required)";
+    send_manual_movement.command_id = 103;
 
     serialCommand move_forward;
     move_forward.name = "Move forward";
@@ -350,7 +354,7 @@ void Gui::set_serial_commands()
 
     serialCommand move_backwards;
     move_backwards.name = "Move backwards";
-    move_backwards.command_id = 101;
+    move_backwards.command_id = 102;
 
     commands.push_back(motor_on); //0
     commands.push_back(motor_off); //1
@@ -423,6 +427,19 @@ void Gui::calculate_angular_velocity_curve()
         if (angular_velocity[i-1] > angular_velocity_max)
             angular_velocity_max = angular_velocity[i-1];
     }
+}
+
+void Gui::read_serial()
+{
+    uint8_t recv_buf[100];
+    int bytes_read = serial_handle->read_bytes(recv_buf, sizeof(recv_buf) / sizeof(uint8_t));
+    char bytes_read_buf[bytes_read];
+    for (int i = 0; i < bytes_read; ++i) {
+        if(recv_buf[i] != 10)
+            bytes_read_buf[i] = recv_buf[i];
+    }
+    if(!std::string(&bytes_read_buf[0]).empty())
+        serial_data.push_back("Recv: " + std::string(&bytes_read_buf[0]));
 }
 
 
