@@ -41,6 +41,7 @@ private:
     float time = 1;
     float manual_movement_size = 10;
     char data_to_send[128] = "";
+    bool scroll_to_bottom = true;
 
     std::vector<std::string> functions;
     std::vector<std::string> serial_data;

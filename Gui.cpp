@@ -36,7 +36,7 @@ int Gui::main_loop()
                 if (ImGui::Button("Disconnect"))
                 {
                     cassy_handle->disconnect();
-                    delete cassy_handle;
+                    //delete cassy_handle;
                     cassy_handle = new Cassy();
                 }
             }
@@ -125,7 +125,10 @@ int Gui::main_loop()
             else
             {
                 if (ImGui::Button("Disconnect"))
+                {
                     serial_handle->disconnect();
+                    serial_data.clear();
+                }
             }
             ImGui::SameLine();
             if(!serial_handle->connected)
@@ -284,8 +287,11 @@ int Gui::main_loop()
                 ImGui::SameLine();
 
                 ImGui::InputFloat("Movement size", &manual_movement_size, 0.0f, 0.0f,  "%4.2f°");
-                read_serial();
+                //read_serial();
                 ImGui::BeginChild("Scrolling", ImVec2(0,0), true);
+                if (scroll_to_bottom)
+                    ImGui::SetScrollHereY(1.0f);
+                scroll_to_bottom = false;
                 for (int i = 0; i < serial_data.size(); ++i) {
                     ImGui::Text(serial_data[i].c_str());
                 }
@@ -372,6 +378,7 @@ void Gui::send_serial_command(serialCommand command)
     if(serial_handle->connected) {
         serial_handle->write_bytes(&command.command_id, 1);
         serial_data.push_back("Send: " + std::to_string(command.command_id));
+        scroll_to_bottom = true;
     }
 }
 
@@ -385,6 +392,7 @@ void Gui::send_serial_parameters(serialCommand command, float parameter)
     strcpy(&buf[1], parameter_str);
     serial_handle->write_bytes(buf, message_length);
     serial_data.push_back("Send: " + std::to_string(buf[0]) + " " + std::string(&buf[1]));
+    scroll_to_bottom = true;
 }
 
 void Gui::set_functions()
