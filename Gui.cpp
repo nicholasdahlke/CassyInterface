@@ -88,6 +88,14 @@ int Gui::main_loop()
                             ImGui::SameLine();
                             if(ImGui::Button(std::string("Turn off " + relay_name).c_str()))
                                 cassy_handle->set_relay(cassy_handle->relays[i], false);
+                            for (int j = 0; j < cassy_handle->voltage_channels.size(); ++j) {
+                                if(cassy_handle->voltage_channels[j].cassy_id == cassy_handle->cassys[i])
+                                {
+                                    ImGui::Text("Voltage Channel %d", j);
+                                    ImGui::SameLine();
+                                    ImGui::Text(std::to_string(cassy_handle->read_voltage(cassy_handle->voltage_channels[j], cassy_handle->v4)).c_str());
+                                }
+                            }
                             ImGui::EndTabItem();
                         }
 
@@ -439,7 +447,7 @@ void Gui::calculate_angular_velocity_curve()
 
 void Gui::read_serial()
 {
-    uint8_t recv_buf[100];
+    uint8_t recv_buf[10];
     int bytes_read = serial_handle->read_bytes(recv_buf, sizeof(recv_buf) / sizeof(uint8_t));
     char bytes_read_buf[bytes_read];
     for (int i = 0; i < bytes_read; ++i) {

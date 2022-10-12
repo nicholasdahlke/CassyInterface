@@ -195,9 +195,9 @@ int Cassy::set_relay(Cassy::relay relay_channel, bool value)
 
 float Cassy::convert_adc_raw(uint8_t *voltage_adc_buf, Cassy::CassyVoltageRanges range)
 {
-    uint16_t raw_adc_voltage = 0;
-    raw_adc_voltage = voltage_adc_buf[1] << 8;
-    raw_adc_voltage = raw_adc_voltage | voltage_adc_buf[2];
+    int16_t raw_adc_voltage = 0;
+    raw_adc_voltage = voltage_adc_buf[2] << 8;
+    raw_adc_voltage = raw_adc_voltage | voltage_adc_buf[3];
     float range_plus_minus = 0;
     switch (range) {
         case v1:
@@ -243,17 +243,18 @@ float Cassy::read_voltage(Cassy::voltage_channel channel, Cassy::CassyVoltageRan
     hid_res = send_command(channel.cassy_id, command, voltage_buf, parameters, 1);
     if (hid_res < 1)
         std::cerr << "Error reading voltage\n";
-    switch (voltage_buf[0]) {
+    //switch(1){ //Uncomment to ignore errors
+    switch (voltage_buf[1]) {
         case 0:
             std::cerr << "Something went wrong(Return code 0)\n";
             break;
         case 1:
             return convert_adc_raw(voltage_buf, range);
         case 2:
-            std::cerr << "Overflow on cassy " << std::hex << static_cast<int>(channel.cassy_id) << "\n";
+            std::cerr << "Overflow on cassy 0x" << std::hex << static_cast<int>(channel.cassy_id) << "\n";
             break;
         case 3:
-            std::cerr << "Underflow on cassy " << std::hex << static_cast<int>(channel.cassy_id) << "\n";
+            std::cerr << "Underflow on cassy 0x" << std::hex << static_cast<int>(channel.cassy_id) << "\n";
             break;
 
     }
