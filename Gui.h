@@ -35,13 +35,16 @@ private:
     static constexpr int curve_samples = 360 * 4;
     float angle_y[curve_samples];
     float angle_t[curve_samples];
+    float angle_readout_y[500];
+    float angle_readout_t[500];
+    int angle_readout_samples = 0;
     float angular_velocity[curve_samples];
+
     float angular_velocity_max = 0;
     float max_angle = 1;
     float time = 1;
     float manual_movement_size = 10;
     char data_to_send[128] = "";
-    bool scroll_to_bottom = true;
 
     std::vector<std::string> functions;
     std::vector<std::string> serial_data;
