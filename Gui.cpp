@@ -200,10 +200,15 @@ int Gui::main_loop()
                 ImPlot::SetupAxis(ImAxis_Y2, "Angular Velocity in deg/sec^-1", ImPlotAxisFlags_AuxDefault);
                 ImPlot::SetupAxisLimits(ImAxis_Y2, angular_velocity_max * 2 + 0.5, angular_velocity_max * -2 - 0.5, ImPlotCond_Always);
 
+                ImPlot::SetupAxis(ImAxis_X2, "Samples", ImPlotAxisFlags_AuxDefault);
+                ImPlot::SetupAxisLimits(ImAxis_X2, 0.0f, 500.0f, ImPlotCond_Always);
+
                 ImPlot::PlotLine("Angle", angle_t, angle_y, curve_samples);
                 ImPlot::SetAxes(ImAxis_X1, ImAxis_Y2);
                 ImPlot::PlotLine("Angular Velocity", angle_t, angular_velocity, curve_samples);
-
+                ImPlot::SetAxes(ImAxis_X2, ImAxis_Y1);
+                if (serial_handle->connected)
+                    ImPlot::PlotLine("Actual Angle", angle_readout_t, angle_readout_y, angle_readout_samples);
                 ImPlot::EndPlot();
             }
 
@@ -249,24 +254,26 @@ int Gui::main_loop()
             if (serial_handle->connected) {
                 ImGui::Text("Motor Control");
 
-                if(ImGui::Button("Send movement data"))
-                {
-                    send_serial_parameters(commands[send_period], time);
-                    send_serial_parameters(commands[send_max_angle], max_angle);
-                }
-
                 ImGui::SameLine();
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
                 if (ImGui::Button(commands[motor_on].name.c_str()))
+                {
+                    send_serial_parameters(commands[send_period], time);
+                    send_serial_parameters(commands[send_max_angle], max_angle);
                     send_serial_command(commands[motor_on]);
+                }
                 ImGui::PopStyleColor();
 
                 ImGui::SameLine();
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
                 if (ImGui::Button(commands[motor_off].name.c_str()))
+                {
+                    send_serial_parameters(commands[send_period], time);
+                    send_serial_parameters(commands[send_max_angle], max_angle);
                     send_serial_command(commands[motor_off]);
+                }
                 ImGui::PopStyleColor();
 
 
@@ -297,9 +304,8 @@ int Gui::main_loop()
                 ImGui::InputFloat("Movement size", &manual_movement_size, 0.0f, 0.0f,  "%4.2f°");
                 //read_serial();
                 ImGui::BeginChild("Scrolling", ImVec2(0,0), true);
-                if (scroll_to_bottom)
-                    ImGui::SetScrollHereY(1.0f);
-                scroll_to_bottom = false;
+                //ImGui::SetScrollHereY(0.0f);
+
                 for (int i = 0; i < serial_data.size(); ++i) {
                     ImGui::Text(serial_data[i].c_str());
                 }
@@ -386,7 +392,6 @@ void Gui::send_serial_command(serialCommand command)
     if(serial_handle->connected) {
         serial_handle->write_bytes(&command.command_id, 1);
         serial_data.push_back("Send: " + std::to_string(command.command_id));
-        scroll_to_bottom = true;
     }
 }
 
@@ -400,7 +405,6 @@ void Gui::send_serial_parameters(serialCommand command, float parameter)
     strcpy(&buf[1], parameter_str);
     serial_handle->write_bytes(buf, message_length);
     serial_data.push_back("Send: " + std::to_string(buf[0]) + " " + std::string(&buf[1]));
-    scroll_to_bottom = true;
 }
 
 void Gui::set_functions()
@@ -455,7 +459,15 @@ void Gui::read_serial()
             bytes_read_buf[i] = recv_buf[i];
     }
     if(!std::string(&bytes_read_buf[0]).empty())
+    {
         serial_data.push_back("Recv: " + std::string(&bytes_read_buf[0]));
+        if (angle_readout_samples >= 499)
+            angle_readout_samples = 0;
+        float val = static_cast<float>(std::atof(bytes_read_buf));
+        angle_readout_y[angle_readout_samples] = val;
+        angle_readout_t[angle_readout_samples] = angle_readout_samples;
+        angle_readout_samples++;
+    }
 }
 
 
