@@ -90,7 +90,7 @@ int Cassy::send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t *
     message[4] = command;
 
     hid_res = hid_write(cassy_handle, message, CASSY_MESSAGE_LENGTH);
-    print_hex(message, sizeof(message)/ sizeof(uint8_t));
+    //print_hex(message, sizeof(message)/ sizeof(uint8_t));
     if (hid_res == -1)
     {
         std::cerr << "Error writing command to device\n";
@@ -116,7 +116,7 @@ int Cassy::send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t *
     message[1] = message_length;
 
     hid_res = hid_write(cassy_handle, message, CASSY_MESSAGE_LENGTH);
-    print_hex(message, sizeof(message)/ sizeof(uint8_t));
+    //print_hex(message, sizeof(message)/ sizeof(uint8_t));
     if (hid_res == -1)
     {
         std::cerr << "Error writing command to device\n";
@@ -251,10 +251,10 @@ float Cassy::read_voltage(Cassy::voltage_channel channel, Cassy::CassyVoltageRan
         case 1:
             return convert_adc_raw(voltage_buf, range);
         case 2:
-            std::cerr << "Overflow on cassy 0x" << std::hex << static_cast<int>(channel.cassy_id) << "\n";
+            std::cerr << "Overflow on channel" <<  static_cast<int>(channel.input_channel) << " on cassy " << std::hex << static_cast<int>(channel.cassy_id) << "\n";
             break;
         case 3:
-            std::cerr << "Underflow on cassy 0x" << std::hex << static_cast<int>(channel.cassy_id) << "\n";
+            std::cerr << "Underflow on channel " << static_cast<int>(channel.input_channel) << " on cassy " << std::hex << static_cast<int>(channel.cassy_id) << "\n";
             break;
 
     }

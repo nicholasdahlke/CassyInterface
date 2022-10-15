@@ -48,7 +48,7 @@ int SerialPort::connect()
     serial_timeouts.ReadTotalTimeoutConstant = 60;
     serial_timeouts.ReadTotalTimeoutMultiplier = 15;
     serial_timeouts.WriteTotalTimeoutConstant = 60;
-    serial_timeouts.WriteTotalTimeoutMultiplier = 8;
+    serial_timeouts.WriteTotalTimeoutMultiplier = 15;
 
     if(!SetCommTimeouts(serial_handle, &serial_timeouts))
     {
@@ -211,9 +211,10 @@ int SerialPort::write_bytes(char* data, int length)
     if(!WriteFile(serial_handle, data, length, &dwWrite, NULL))
     {
         std::cerr << "Error writing data\n";
+        std::cout << GetLastError() << "\n";
         return -1;
     }
-
+    FlushFileBuffers(serial_handle);
     if(dwWrite != length)
     {
         std::cerr << "None or not all bytes written\n";

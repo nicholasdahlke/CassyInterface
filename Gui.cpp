@@ -269,11 +269,7 @@ int Gui::main_loop()
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
                 if (ImGui::Button(commands[motor_off].name.c_str()))
-                {
-                    send_serial_parameters(commands[send_period], time);
-                    send_serial_parameters(commands[send_max_angle], max_angle);
                     send_serial_command(commands[motor_off]);
-                }
                 ImGui::PopStyleColor();
 
 
