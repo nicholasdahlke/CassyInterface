@@ -4,6 +4,7 @@
 
 #ifndef CASSYINTERFACE_GUI_H
 #define CASSYINTERFACE_GUI_H
+#define GL_GLEXT_PROTOTYPES
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
@@ -11,7 +12,9 @@
 #include <GLFW/glfw3.h>
 #include "Cassy.h"
 #include "SerialPort.h"
+#include "DataCapture.h"
 #include <cmath>
+#include "ImFileDialog/ImFileDialog.h"
 
 class Gui {
 public:
@@ -29,6 +32,8 @@ private:
     const char* glsl_version;
     Cassy* cassy_handle;
     SerialPort* serial_handle;
+    DataCapture* data_capture;
+
     int selected_port_index = 0;
     int selected_command_index = 0;
     int selected_function_index = 0;
@@ -46,6 +51,11 @@ private:
     float manual_movement_size = 10;
     char data_to_send[128] = "";
 
+    bool show_results_table = false;
+
+    const ImVec4 green = ImVec4(0.0588, 0.788, 0.172, 1);
+    const ImVec4 red = ImVec4(1, 0, 0, 1);
+
     std::vector<std::string> functions;
     std::vector<std::string> serial_data;
 
@@ -57,6 +67,7 @@ private:
     void calculate_angular_velocity_curve();
     void set_serial_commands();
     void set_functions();
+    void set_capture_variables();;
 
     void read_serial();
 

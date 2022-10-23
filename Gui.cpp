@@ -93,7 +93,7 @@ int Gui::main_loop()
                                 {
                                     ImGui::Text("Voltage Channel %d", j);
                                     ImGui::SameLine();
-                                    ImGui::Text(std::to_string(cassy_handle->read_voltage(cassy_handle->voltage_channels[j], cassy_handle->v4)).c_str());
+                                    ImGui::Text("%s", std::to_string(cassy_handle->read_voltage(cassy_handle->voltage_channels[j], cassy_handle->v4)).c_str());
                                 }
                             }
                             ImGui::EndTabItem();
@@ -256,7 +256,7 @@ int Gui::main_loop()
 
                 ImGui::SameLine();
 
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0588, 0.788, 0.172, 1));
+                ImGui::PushStyleColor(ImGuiCol_Button, green);
                 if (ImGui::Button(commands[motor_on].name.c_str()))
                 {
                     send_serial_parameters(commands[send_period], time);
@@ -267,7 +267,7 @@ int Gui::main_loop()
 
                 ImGui::SameLine();
 
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
+                ImGui::PushStyleColor(ImGuiCol_Button, red);
                 if (ImGui::Button(commands[motor_off].name.c_str()))
                     send_serial_command(commands[motor_off]);
                 ImGui::PopStyleColor();
@@ -303,7 +303,7 @@ int Gui::main_loop()
                 //ImGui::SetScrollHereY(0.0f);
 
                 for (int i = 0; i < serial_data.size(); ++i) {
-                    ImGui::Text(serial_data[i].c_str());
+                    ImGui::Text("%s", serial_data[i].c_str());
                 }
                 ImGui::EndChild();
             }
@@ -313,7 +313,75 @@ int Gui::main_loop()
             ImGui::Begin("ImGui Metrics");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
+//######################################################################################################################
+            ImGui::Begin("Data Capture");
+
+            ImGui::BeginDisabled(data_capture->getCapturePath().empty() || data_capture->CaptureOpen());
+            ImGui::PushStyleColor(ImGuiCol_Button, green);
+            if (ImGui::Button("Start Capture"))
+            {
+                data_capture->startCapture();
+            }
+            ImGui::EndDisabled();
+
+            ImGui::PopStyleColor();
+
+            ImGui::SameLine();
+
+            ImGui::BeginDisabled(data_capture->getCapturePath().empty() || !data_capture->CaptureOpen());
+            ImGui::PushStyleColor(ImGuiCol_Button, red);
+            if (ImGui::Button("Stop Capture"))
+            {
+                data_capture->stopCapture();
+            }
+            data_capture->dataCaptureMainLoop();
+            ImGui::PopStyleColor();
+            ImGui::EndDisabled();
+
+            ImGui::SameLine();
+            ImGui::Dummy(ImVec2(1, 0));
+            ImGui::SameLine();
+
+            if (ImGui::Button("Choose Capture Path"))
+                ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
+
+            if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog")) {
+                if (ifd::FileDialog::Instance().HasResult()) {
+                   data_capture->setCapturePath(ifd::FileDialog::Instance().GetResult().generic_string());
+                }
+                ifd::FileDialog::Instance().Close();
+            }
+
+
+            if(!data_capture->getCapturePath().empty())
+            {
+                ImGui::SameLine();
+                ImGui::Text(data_capture->getCapturePath().c_str());
+            }
+
+            ImGui::Separator();
+
+            if(data_capture->CaptureOpen())
+                show_results_table = true;
+
+            if (show_results_table && ImGui::BeginTable("Data Capture", data_capture->category_string.size(), ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY))
+            {
+                for(std::string const& name: data_capture->category_string)
+                    ImGui::TableSetupColumn(name.c_str());
+                ImGui::TableHeadersRow();
+                ImGui::TableNextColumn();
+
+                for(std::string const& value: data_capture->value_string)
+                {
+                    ImGui::Text(value.c_str());
+                    ImGui::TableNextColumn();
+                }
+                ImGui::EndTable();
+            }
+
+            ImGui::End();
         }
+//######################################################################################################################
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -466,6 +534,14 @@ void Gui::read_serial()
     }
 }
 
+void Gui::set_capture_variables()
+{
+    data_capture = new DataCapture();
+
+    data_capture->setCap(&selected_port_index, "selected_port");
+    data_capture->setCap(&angular_velocity_max, "max_velocity");
+    data_capture->setCap(&max_angle, "max_angle");
+}
 
 Gui::Gui()
 {
@@ -502,4 +578,25 @@ Gui::Gui()
     serial_handle = new SerialPort();
     set_serial_commands();
     set_functions();
+    set_capture_variables();
+
+    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
+        GLuint tex;
+
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return (void*)tex;
+    };
+    ifd::FileDialog::Instance().DeleteTexture = [](void * tex) {
+        GLuint texID = (intptr_t)tex;
+        glDeleteTextures(1, &texID);
+    };
 }

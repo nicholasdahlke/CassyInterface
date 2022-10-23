@@ -49,7 +49,7 @@ public:
     bool connect();
     void disconnect();
 
-    float read_voltage(voltage_channel channel, CassyVoltageRanges range); //reads and returns the voltage
+    double read_voltage(voltage_channel channel, CassyVoltageRanges range); //reads and returns the voltage
     int set_relay(relay relay_channel, bool value);
 
     void print_voltage_channels();
@@ -88,7 +88,7 @@ private:
 
     int send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t* res_buf, uint8_t* parameters, int parameter_length);
     int send_command(uint8_t cassy_id_param, CassyCommands command, uint8_t* res_buf);
-    float convert_adc_raw(uint8_t * voltage_adc_buf, CassyVoltageRanges range);
+    double convert_adc_raw(uint8_t * voltage_adc_buf, CassyVoltageRanges range);
 
     void print_hex(uint8_t *buf, int len);
 };

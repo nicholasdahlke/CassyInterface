@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['gui_2',['Gui',['../classGui.html',1,'']]]
+  ['datacapture_2',['DataCapture',['../classDataCapture.html',1,'']]],
+  ['doublecap_3',['DoubleCap',['../structDataCapture_1_1DoubleCap.html',1,'DataCapture']]]
 ];

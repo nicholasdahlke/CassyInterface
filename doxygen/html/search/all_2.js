@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['relay_3',['relay',['../structCassy_1_1relay.html',1,'Cassy']]]
+  ['floatcap_4',['FloatCap',['../structDataCapture_1_1FloatCap.html',1,'DataCapture']]]
 ];

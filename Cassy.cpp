@@ -193,7 +193,7 @@ int Cassy::set_relay(Cassy::relay relay_channel, bool value)
 
 }
 
-float Cassy::convert_adc_raw(uint8_t *voltage_adc_buf, Cassy::CassyVoltageRanges range)
+double Cassy::convert_adc_raw(uint8_t *voltage_adc_buf, Cassy::CassyVoltageRanges range)
 {
     int16_t raw_adc_voltage = 0;
     raw_adc_voltage = voltage_adc_buf[2] << 8;
@@ -226,11 +226,11 @@ float Cassy::convert_adc_raw(uint8_t *voltage_adc_buf, Cassy::CassyVoltageRanges
             break;
     }
 
-    const float volt_per_adc = range_plus_minus / ADC_CALIB_ACCURACY;
+    const double volt_per_adc = range_plus_minus / ADC_CALIB_ACCURACY;
     return volt_per_adc * raw_adc_voltage;
 }
 
-float Cassy::read_voltage(Cassy::voltage_channel channel, Cassy::CassyVoltageRanges range)
+double Cassy::read_voltage(Cassy::voltage_channel channel, Cassy::CassyVoltageRanges range)
 {
     CassyCommands command;
     if (channel.input_channel == a)

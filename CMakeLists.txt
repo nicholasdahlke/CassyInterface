@@ -31,7 +31,10 @@ set(sources
         implot/implot_internal.h
         implot/implot.cpp
         implot/implot_items.cpp
-        )
+        ImFileDialog/ImFileDialog.cpp
+        ImFileDialog/ImFileDialog.h
+        stb_image.h
+        DataCapture.cpp DataCapture.h)
 
 
 add_executable(CassyInterface main.cpp Cassy.h Cassy.cpp SerialPort.cpp SerialPort.h Gui.cpp Gui.h ${sources})
