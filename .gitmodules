@@ -7,6 +7,3 @@
 [submodule "implot"]
 	path = implot
 	url = https://github.com/epezent/implot.git
-[submodule "ImFileDialog"]
-	path = ImFileDialog
-	url = https://github.com/dfranx/ImFileDialog.git
